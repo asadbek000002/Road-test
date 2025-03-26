@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - .:/RoadTest
+      - static_volume:/RoadTest/staticfiles
+      - media_volume:/RoadTest/mediafiles
+    ports:
+      - "8001:8000"
+    depends_on:
+      road_test_db:
+        condition: service_healthy
+    restart: always
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  road_test_db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: road_test
+      POSTGRES_USER: user_road_test
+      POSTGRES_PASSWORD: password_road_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user_road_test -d road_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
