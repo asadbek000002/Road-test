@@ -1,26 +1,50 @@
 from rest_framework import serializers
+from django.utils.translation import get_language
 from .models import AnswerChoice, Question, Category
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
-        fields = ['id', 'title']
+        fields = ['id', 'title']  # Faqat dinamik title
+
+    def get_title(self, obj):
+        lang = get_language()  # Foydalanuvchining hozirgi tili
+        return getattr(obj, f"title_{lang}", obj.title_uz)  # Agar title_{lang} bo‘lmasa, default "uz"
 
 
 # savollarni get qilish
+
 class AnswerChoiceSerializer(serializers.ModelSerializer):
+    text = serializers.SerializerMethodField()  # Dinamik text qo‘shildi
+
     class Meta:
         model = AnswerChoice
         fields = ['id', 'text', 'is_correct']  # `is_correct` ham qo'shildi
 
+    def get_text(self, obj):
+        lang = get_language()  # Joriy foydalanuvchi tili
+        return getattr(obj, f"text_{lang}", obj.text_uz)  # Standart `uz` bo‘ladi
+
 
 class QuestionSerializer(serializers.ModelSerializer):
-    choices = AnswerChoiceSerializer(many=True, read_only=True)
+    text = serializers.SerializerMethodField()  # Dinamik text
+    correct_answer = serializers.SerializerMethodField()  # Dinamik javob
+    choices = AnswerChoiceSerializer(many=True, read_only=True)  # Tanlov variantlari
 
     class Meta:
         model = Question
         fields = ['id', 'text', 'image', 'correct_answer', 'choices']
+
+    def get_text(self, obj):
+        lang = get_language()  # Joriy tilni olish
+        return getattr(obj, f"text_{lang}", obj.text_uz)  # Agar mavjud bo‘lmasa, `uz`
+
+    def get_correct_answer(self, obj):
+        lang = get_language()  # Joriy til
+        return getattr(obj, f"correct_answer_{lang}", obj.correct_answer_uz)  # Agar mavjud bo‘lmasa, `uz`
 
 
 # userni javoblarini olish

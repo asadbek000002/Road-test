@@ -7,6 +7,7 @@ class AnswerChoiceInline(admin.TabularInline):
     extra = 2  # Sukut bo‘yicha 3 ta bo‘sh variant qo‘shiladi
     min_num = 2  # Kamida 2 ta variant bo‘lishi kerak
     max_num = 6  # Maksimal 5 ta variant qo‘shish mumkin
+    exclude = ('text',)
 
     def get_extra(self, request, obj=None, **kwargs):
         """
@@ -17,23 +18,26 @@ class AnswerChoiceInline(admin.TabularInline):
             return 0  # Agar mavjud bo‘lsa, bo‘sh variant qo‘shilmaydi
         return self.extra  # Aks holda, `extra` qiymati ishlaydi
 
+
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('text', 'category',)
+    list_display = ('text_uz', 'text_ru', 'text_en', 'category',)
     list_filter = ('category',)
-    search_fields = ('text',)
-
-    inlines = [AnswerChoiceInline]  # Inline qo‘shildi
+    search_fields = ('text_uz', 'text_ru', 'text_en')
+    inlines = [AnswerChoiceInline]
+    exclude = ('text', 'correct_answer')
 
 
 @admin.register(Category)
-class QuestionSetAdmin(admin.ModelAdmin):
-    list_display = ('title', 'created_at',)
-    search_fields = ('title',)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('title_uz', 'title_ru', 'title_en', 'created_at',)
+    search_fields = ('title_uz', 'title_ru', 'title_en')
+    exclude = ('title',)  # Asl `title` maydonini yashiramiz
 
 
 @admin.register(AnswerChoice)
 class AnswerChoiceAdmin(admin.ModelAdmin):
-    list_display = ('text', 'question', 'is_correct',)
+    list_display = ('text_uz', 'text_ru', 'text_en', 'question', 'is_correct',)
     list_filter = ('is_correct',)
-    search_fields = ('text',)
+    search_fields = ('text_uz', 'text_ru', 'text_en')
+    exclude = ('text',)  # Asl `text` maydonini yashiramiz
