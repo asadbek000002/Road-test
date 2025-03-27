@@ -5,6 +5,9 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
+from rest_framework.views import APIView
+from .models import Contact
+from .serializers import ContactSerializer
 
 User = get_user_model()
 
@@ -38,7 +41,6 @@ def login(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout(request):
@@ -54,3 +56,11 @@ def logout(request):
     except Exception as e:
         return Response({"error": "Xatolik yuz berdi!"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class ContactAPIView(APIView):
+    def get(self, request):
+        contact = Contact.objects.first()  # Faqat bitta obyektni qaytaradi
+        if contact:
+            serializer = ContactSerializer(contact)
+            return Response(serializer.data)
+        return Response({"message": "Contact not found"}, status=404)

@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from user.models import Contact
+
 User = get_user_model()
 
 
@@ -33,3 +35,9 @@ class LoginSerializer(serializers.Serializer):
 
         data['user'] = user
         return data
+
+
+class ContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = ['tg_link', 'card_number']
