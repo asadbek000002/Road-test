@@ -101,28 +101,22 @@ def submit_answers(request):
 
     answers = serializer.validated_data.get("answers", [])
 
-    if not answers:  # Bo‘sh bo‘lsa, natijani 0 qilib qaytaramiz
-        return Response({
-            "total_questions": 0,
-            "correct_answers": 0,
-            "incorrect_answers": 0,
-            "percentage": 0
-        })
-
-    # IDlar bo‘yicha barcha javob variantlarini bitta so‘rovda olish
-    answer_ids = [answer["answer_id"] for answer in answers]
+    # Barcha javob variantlari IDlari
+    answer_ids = [answer["answer_id"] for answer in answers if answer["answer_id"] is not None]
     correct_answers = set(
         AnswerChoice.objects.filter(id__in=answer_ids, is_correct=True).values_list("id", flat=True)
     )
 
-    # To‘g‘ri javoblarni sanash
+    # To‘g‘ri va noto‘g‘ri javoblarni sanash
     correct_count = sum(1 for answer in answers if answer["answer_id"] in correct_answers)
     total_questions = len(answers)
-    percentage = round((correct_count / total_questions) * 100, 2)
+    incorrect_count = total_questions - correct_count  # Noto‘g‘ri hisoblanganlar
+
+    percentage = round((correct_count / total_questions) * 100, 2) if total_questions > 0 else 0
 
     return Response({
         "total_questions": total_questions,
         "correct_answers": correct_count,
-        "incorrect_answers": total_questions - correct_count,
+        "incorrect_answers": incorrect_count,
         "percentage": percentage
     })

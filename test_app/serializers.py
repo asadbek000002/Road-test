@@ -48,7 +48,23 @@ class AnswerSerializer(serializers.Serializer):
 
 class SubmitAnswersSerializer(serializers.Serializer):
     answers = serializers.ListField(
-        child=serializers.DictField(),
+        child=AnswerSerializer(),
         required=False,  # Majburiy emas
         allow_empty=True  # Bo‘sh bo‘lishiga ruxsat berish
     )
+
+    def validate(self, data):
+        """Foydalanuvchining jo‘natgan javoblarini tekshirish"""
+        answers = data.get("answers", [])
+
+        # Barcha savollarni olish
+        all_question_ids = set(Question.objects.values_list("id", flat=True))
+        answered_question_ids = {answer["question_id"] for answer in answers}
+
+        # Agar foydalanuvchi ba’zi savollarga javob bermagan bo‘lsa, ularni noto‘g‘ri hisoblash uchun qo‘shamiz
+        missing_questions = all_question_ids - answered_question_ids
+        for question_id in missing_questions:
+            answers.append({"question_id": question_id, "answer_id": None})  # Hech qanday javob berilmagan
+
+        data["answers"] = answers
+        return data
