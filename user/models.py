@@ -15,6 +15,7 @@ class UserManager(BaseUserManager):
     def create_superuser(self, phone_number, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+        # extra_fields.setdefault("is_active", True)
         return self.create_user(phone_number, password, **extra_fields)
 
 
@@ -39,3 +40,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     def has_module_perms(self, app_label):
         return self.is_superuser  # <-- Superuser barcha modullarga kira oladi
 
+
+
+class Contact(models.Model):
+    tg_link = models.URLField(max_length=200, unique=True)
+    card_number = models.CharField(max_length=25, null=True, blank=True)
+
+    def __str__(self):
+        return self.card_number
