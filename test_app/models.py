@@ -14,6 +14,7 @@ class Question(models.Model):
     text = models.TextField()  # Savol matni
     image = models.ImageField(upload_to='questions/', null=True, blank=True)  # Savolga tegishli rasm (ixtiyoriy)
     correct_answer = models.TextField()  # To‘g‘ri javob matni
+    order = models.IntegerField(default=0)
 
     def __str__(self):
         return self.text

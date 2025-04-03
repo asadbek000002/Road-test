@@ -1,6 +1,9 @@
 from django.urls import path
-from .views import submit_answers, get_questions, get_random_questions, \
-    get_questions_by_category, get_categories, get_question_pages, get_questions_by_page
+from .views import get_questions, get_random_questions, \
+    get_questions_by_category, get_categories, get_question_pages, get_questions_by_page, submit_random_answers, \
+    submit_paged_answers
+
+# submit_answers
 
 urlpatterns = [
 
@@ -11,5 +14,9 @@ urlpatterns = [
     path('categories/', get_categories, name='categories-list'),
     path('categories/<int:category_id>/questions/', get_questions_by_category, name="categories-questions"),
 
-    path('submit-answers/', submit_answers, name="submit_answers"),
+    path('submit-random-answers/', submit_random_answers, name='submit_random_answers'),
+
+    path('submit-paged-answers/<int:page_number>/', submit_paged_answers, name='submit_paged_answers'),
+
+    # path('submit-answers/', submit_answers, name="submit_answers"),
 ]

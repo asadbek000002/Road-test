@@ -49,6 +49,15 @@ INSTALLED_APPS = [
     'test_app',
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/django_cache',  # Cache saqlanadigan joy
+        'TIMEOUT': 1800,  # 30 daqiqa saqlanadi
+    }
+}
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     "corsheaders.middleware.CorsMiddleware",

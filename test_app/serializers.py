@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.utils.translation import get_language
 from .models import AnswerChoice, Question, Category
+from django.core.cache import cache
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -91,4 +92,75 @@ class SubmitAnswersSerializer(serializers.Serializer):
             answers.append({"question_id": question_id, "answer_id": None})  # Hech qanday javob berilmagan
 
         data["answers"] = answers
+        return data
+
+
+class SubmitRandomAnswersSerializer(serializers.Serializer):
+    answers = serializers.ListField(
+        child=AnswerSerializer(),
+        required=False,  # Majburiy emas
+        allow_empty=True  # Bo‘sh bo‘lishiga ruxsat berish
+    )
+
+    def validate(self, data):
+        """Foydalanuvchining jo‘natgan javoblarini tekshirish"""
+        answers = data.get("answers", [])
+
+        # Cache-dan tasodifiy savollarni olish
+        cache_key = f"random_question_ids_{self.context['request'].user.id}"
+        question_ids = cache.get(cache_key)  # Cache-dagi tasodifiy savollar IDlari
+
+        if not question_ids:
+            raise serializers.ValidationError("Test sessiyasi topilmadi. Iltimos, yangi test boshlang!")
+
+        # Foydalanuvchi faqat tasodifiy savollarga javob berishi kerak
+        answered_question_ids = {answer["question_id"] for answer in answers}
+
+        if not answered_question_ids.issubset(set(question_ids)):
+            raise serializers.ValidationError("Berilgan savollar tasodifiy savollarga mos kelmaydi!")
+
+        # Tasodifiy savollarni tekshirish
+        missing_questions = set(question_ids) - answered_question_ids
+        for question_id in missing_questions:
+            answers.append({"question_id": question_id, "answer_id": None})  # Hech qanday javob berilmagan
+
+        data["answers"] = answers
+        return data
+
+
+class SubmitPageAnswersSerializer(serializers.Serializer):
+    answers = serializers.ListField(
+        child=AnswerSerializer(),
+        required=False,  # Majburiy emas
+        allow_empty=True  # Bo‘sh bo‘lishiga ruxsat berish
+    )
+
+    def validate(self, data):
+        """Foydalanuvchining jo‘natgan javoblarini tekshirish"""
+        answers = data.get("answers", [])
+
+        # Sahifadagi savollarni olish
+        page_size = 3
+        page_number = self.context.get("page_number")  # Sahifa raqamini contextdan olish
+        questions = Question.objects.only('id', 'text', 'image', 'correct_answer')[
+                    page_size * (page_number - 1):page_size * page_number
+                    ]
+        # Sahifadagi savollar IDlarini olish
+        valid_question_ids = {question.id for question in questions}
+
+        # Yuborilgan savollarning IDlarini olish
+        answered_question_ids = {answer["question_id"] for answer in answers}
+
+        # Sahifaga tegishli bo‘lmagan savollarni olib tashlash
+        valid_answers = []
+        for answer in answers:
+            if answer["question_id"] in valid_question_ids:
+                valid_answers.append(answer)  # Faqat sahifaga tegishli savollarni saqlash
+            else:
+                # Sahifaga tegishli bo‘lmagan savollarni olib tashlash va False qilib qo‘yish
+                answer["answer_id"] = False  # Bu yerda False qilib qo‘yish
+                valid_answers.append(answer)
+
+        # Faqat sahifaga tegishli bo‘lgan javoblarni qabul qilish
+        data["answers"] = valid_answers
         return data
