@@ -19,7 +19,7 @@ def get_random_questions(request):
     cache_question_ids_key = f"random_question_ids_{request.user.id}"
 
     if force_new or not cache.get(cache_key):
-        selected_questions = list(Question.objects.order_by('?')[:10])  # Tasodifiy 10 ta olish
+        selected_questions = list(Question.objects.order_by('?')[:20])  # Tasodifiy 10 ta olish
         question_ids = [q.id for q in selected_questions]  # Faqat ID-larni olish
 
         # Cache-ga savollarni va ularning ID-larini saqlash
