@@ -182,9 +182,9 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=24),  # Access token muddati
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Refresh token muddati
-    "BLACKLIST_AFTER_ROTATION": True,  # Refresh token bir marta ishlatilganda eski tokenni bekor qiladi
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=30),  # Access token muddati 1 oy
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=90),  # Refresh token muddati 3 oy (kerakli qiymatga o'zgartiring)
+    "BLACKLIST_AFTER_ROTATION": True,  # Eski refresh tokenni bekor qilish
     "ROTATE_REFRESH_TOKENS": True,
 }
 
