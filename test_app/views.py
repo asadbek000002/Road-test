@@ -51,8 +51,10 @@ def get_question_pages(request):
 def get_questions_by_page(request, page_number):
     """Tanlangan sahifadagi 20 ta savolni chiqarish"""
     page_size = 10
-    questions = Question.objects.only('id', 'text', 'image', 'correct_answer')[
-                page_size * (page_number - 1):page_size * page_number]
+    questions = Question.objects.only('id', 'text', 'image', 'correct_answer', 'order') \
+                    .order_by('order')[
+                page_size * (page_number - 1):page_size * page_number
+                ]
 
     serializer = QuestionSerializer(questions, many=True, context={'request': request})
     return Response({
@@ -64,8 +66,10 @@ def get_questions_by_page(request, page_number):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_questions(request):
-    """Savollar va javob variantlarini optimallashtirilgan holda olish"""
-    questions = Question.objects.only('id', 'text', 'image', 'correct_answer').prefetch_related('choices')
+    """Savollar va javob variantlarini `order` bo‘yicha oshish tartibida optimallashtirilgan holda olish"""
+    questions = Question.objects.only('id', 'text', 'image', 'correct_answer', 'order') \
+        .prefetch_related('choices') \
+        .order_by('order')
 
     serializer = QuestionSerializer(questions, many=True, context={'request': request})
     return Response(serializer.data)
@@ -77,8 +81,10 @@ def get_questions_by_category(request, category_id):
     """Berilgan kategoriya ID bo‘yicha savollarni optimallashtirilgan holda olish"""
     category = get_object_or_404(Category.objects.only('id', 'title'), id=category_id)
 
-    questions = Question.objects.filter(category=category).only('id', 'text', 'image',
-                                                                'correct_answer').prefetch_related('choices')
+    questions = Question.objects.filter(category=category) \
+        .only('id', 'text', 'image', 'correct_answer', 'order') \
+        .prefetch_related('choices') \
+        .order_by('order')  # Tartib bo‘yicha oshish
 
     serializer = QuestionSerializer(questions, many=True, context={'request': request})
     return Response({
