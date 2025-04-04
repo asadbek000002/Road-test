@@ -140,7 +140,7 @@ class SubmitPageAnswersSerializer(serializers.Serializer):
         answers = data.get("answers", [])
 
         # Sahifadagi savollarni olish
-        page_size = 3
+        page_size = 10
         page_number = self.context.get("page_number")  # Sahifa raqamini contextdan olish
         questions = Question.objects.only('id', 'text', 'image', 'correct_answer') .order_by('order')[
                     page_size * (page_number - 1):page_size * page_number
