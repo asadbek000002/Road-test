@@ -164,7 +164,7 @@ def submit_paged_answers(request, page_number):
 
     # Sahifaga mos savollarni olish
     page_size = 10
-    questions = Question.objects.only('id', 'text', 'image', 'correct_answer')[
+    questions = Question.objects.only('id', 'text', 'image', 'correct_answer').order_by('order')[
                 page_size * (page_number - 1):page_size * page_number
                 ]
 
