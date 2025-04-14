@@ -25,9 +25,13 @@ class AnswerChoiceSerializer(serializers.ModelSerializer):
         model = AnswerChoice
         fields = ['id', 'text', 'is_correct']  # `is_correct` ham qo'shildi
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.lang = get_language()  # Faqat bir marta chaqiriladi ✅
+
     def get_text(self, obj):
-        lang = get_language()  # Joriy foydalanuvchi tili
-        return getattr(obj, f"text_{lang}", obj.text_uz)  # Standart `uz` bo‘ladi
+        # lang = get_language()  # Joriy foydalanuvchi tili
+        return getattr(obj, f"text_{self.lang}", obj.text_uz)  # Standart `uz` bo‘ladi
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -39,13 +43,17 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = ['id', 'text', 'image', 'correct_answer', 'choices']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.lang = get_language()  # Faqat bir marta chaqiriladi ✅
+
     def get_text(self, obj):
-        lang = get_language()  # Joriy tilni olish
-        return getattr(obj, f"text_{lang}", obj.text_uz)  # Agar mavjud bo‘lmasa, `uz`
+        # lang = get_language()  # Joriy tilni olish
+        return getattr(obj, f"text_{self.lang}", obj.text_uz)  # Agar mavjud bo‘lmasa, `uz`
 
     def get_correct_answer(self, obj):
-        lang = get_language()  # Joriy til
-        return getattr(obj, f"correct_answer_{lang}", obj.correct_answer_uz)  # Agar mavjud bo‘lmasa, `uz`
+        # lang = get_language()  # Joriy til
+        return getattr(obj, f"correct_answer_{self.lang}", obj.correct_answer_uz)  # Agar mavjud bo‘lmasa, `uz`
 
 
 # userni javoblarini olish
@@ -142,7 +150,7 @@ class SubmitPageAnswersSerializer(serializers.Serializer):
         # Sahifadagi savollarni olish
         page_size = 10
         page_number = self.context.get("page_number")  # Sahifa raqamini contextdan olish
-        questions = Question.objects.only('id', 'text', 'image', 'correct_answer') .order_by('order')[
+        questions = Question.objects.only('id', 'text', 'image', 'correct_answer').order_by('order')[
                     page_size * (page_number - 1):page_size * page_number
                     ]
         # Sahifadagi savollar IDlarini olish

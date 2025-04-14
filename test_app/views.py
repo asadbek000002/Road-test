@@ -8,6 +8,9 @@ from .models import Question, AnswerChoice, Category
 from .serializers import SubmitAnswersSerializer, QuestionSerializer, CategorySerializer, SubmitPageAnswersSerializer, \
     SubmitRandomAnswersSerializer
 from django.db.models import Count
+from django.db.models import Prefetch
+from django.views.decorators.vary import vary_on_cookie
+from django.views.decorators.cache import cache_page
 
 
 @api_view(['POST'])
@@ -66,13 +69,20 @@ def get_questions_by_page(request, page_number):
     })
 
 
+@vary_on_cookie
+@cache_page(60 * 5)
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def get_questions(request):
-    """Savollar va javob variantlarini `order` bo‘yicha oshish tartibida optimallashtirilgan holda olish"""
-    questions = Question.objects.only('id', 'text', 'image', 'correct_answer', 'order') \
-        .prefetch_related('choices') \
-        .order_by('order')
+    questions = Question.objects.only(
+        'id', 'image', 'order',
+        'text_uz', 'text_en', 'text_ru',
+        'correct_answer_uz', 'correct_answer_en', 'correct_answer_ru'
+    ).prefetch_related(
+        Prefetch('choices', queryset=AnswerChoice.objects.only(
+            'id', 'question', 'text_uz', 'text_en', 'text_ru'
+        ))
+    ).order_by('order')
 
     serializer = QuestionSerializer(questions, many=True, context={'request': request})
     return Response(serializer.data)
