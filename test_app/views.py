@@ -19,7 +19,7 @@ def get_random_questions(request):
     cache_question_ids_key = f"random_question_ids_{request.user.id}"
 
     if force_new or not cache.get(cache_key):
-        selected_questions = list(Question.objects.order_by('?')[:20])  # Tasodifiy 10 ta olish
+        selected_questions = list(Question.objects.order_by('?')[:20])  # Tasodifiy 20 ta olish
         question_ids = [q.id for q in selected_questions]  # Faqat ID-larni olish
 
         # Cache-ga savollarni va ularning ID-larini saqlash
@@ -37,7 +37,7 @@ def get_random_questions(request):
 def get_question_pages(request):
     """Savollarni sahifalarga ajratib, faqat sahifa raqamlarini chiqarish"""
     total_questions = Question.objects.aggregate(count=Count('id'))['count']
-    page_size = 10  # Har bir sahifada nechta savol bo‘lishi
+    page_size = 10  # Har bir sahifada 10 savol bo‘lishi
     total_pages = -(-total_questions // page_size)  # Yuqoriga yaxlitlash (ceil)
 
     return Response({
@@ -49,12 +49,15 @@ def get_question_pages(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_questions_by_page(request, page_number):
-    """Tanlangan sahifadagi 20 ta savolni chiqarish"""
+    """Tanlangan sahifadagi savollarni chiqarish 10 tadan"""
     page_size = 10
+
+    # Savollarni order bo‘yicha tartiblash
     questions = Question.objects.only('id', 'text', 'image', 'correct_answer', 'order') \
-                    .order_by('order')[
-                page_size * (page_number - 1):page_size * page_number
-                ]
+        .order_by('order')  # order bo‘yicha tartiblash
+
+    # Sahifalashni qo‘shish
+    questions = questions[page_size * (page_number - 1):page_size * page_number]
 
     serializer = QuestionSerializer(questions, many=True, context={'request': request})
     return Response({
@@ -206,35 +209,3 @@ def submit_paged_answers(request, page_number):
         "incorrect_answers": incorrect_count,  # Noto‘g‘ri javoblar soni
         "percentage": percentage  # To‘g‘rilik foizi
     })
-
-#
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def submit_answers(request):
-#     """Foydalanuvchi javoblarini tekshirib natijani qaytarish"""
-#     serializer = SubmitAnswersSerializer(data=request.data)
-#
-#     if not serializer.is_valid():
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#     answers = serializer.validated_data.get("answers", [])
-#
-#     # Barcha javob variantlari IDlari
-#     answer_ids = [answer["answer_id"] for answer in answers if answer["answer_id"] is not None]
-#     correct_answers = set(
-#         AnswerChoice.objects.filter(id__in=answer_ids, is_correct=True).values_list("id", flat=True)
-#     )
-#
-#     # To‘g‘ri va noto‘g‘ri javoblarni sanash
-#     correct_count = sum(1 for answer in answers if answer["answer_id"] in correct_answers)
-#     total_questions = len(answers)
-#     incorrect_count = total_questions - correct_count  # Noto‘g‘ri hisoblanganlar
-#
-#     percentage = round((correct_count / total_questions) * 100, 2) if total_questions > 0 else 0
-#
-#     return Response({
-#         "total_questions": total_questions,
-#         "correct_answers": correct_count,
-#         "incorrect_answers": incorrect_count,
-#         "percentage": percentage
-#     })

@@ -21,10 +21,25 @@ class AnswerChoiceInline(admin.TabularInline):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('text_uz', 'text_ru', 'text_en', 'category',)
+    # Savollarni 'order' bo'yicha tartiblash
+    list_display = ('text_uz', 'order', 'text_ru', 'text_en', 'category')
+
+    # Savollarni 'order' bo'yicha avtomatik tartiblash
+    ordering = ['order']
+
+    # Admin panelda 'order' ni tahrirlash imkonini yaratish
+    list_editable = ['order']
+
+    # Filtrlash
     list_filter = ('category',)
+
+    # Qidiruv uchun so'zlar
     search_fields = ('text_uz', 'text_ru', 'text_en')
+
+    # Inline modeli
     inlines = [AnswerChoiceInline]
+
+    # 'text' va 'correct_answer' maydonlarini admin paneldan chiqarish
     exclude = ('text', 'correct_answer')
 
 
