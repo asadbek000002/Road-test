@@ -188,16 +188,8 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
 }
 
-# 🔹 CORS - Barcha domenlarga ruxsat berish (FAQAT TEST UCHUN!)
-CORS_ALLOW_ALL_ORIGINS = True  # Production uchun FALSE qilish tavsiya etiladi!
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# 🔹 CORS - Faqat ma'lum domenlarga ruxsat berish
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
-#     "https://yourfrontend.com",
-# ]
 
-# 🔹 CSRF - Barcha API so‘rovlaridan CSRF tekshiruvini o‘chirish
-# CSRF_TRUSTED_ORIGINS = ["http://localhost:8001", "https://yourfrontend.com"]
-# CSRF_COOKIE_SECURE = False  # Agar HTTPS ishlatilsa, True qiling
+CSRF_COOKIE_DOMAIN = 'backend.tarixmanba.uz'
+CSRF_TRUSTED_ORIGINS = ['https://subdomain.vodnikavtotest.uz',]
