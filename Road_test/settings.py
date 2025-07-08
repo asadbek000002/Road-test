@@ -191,5 +191,5 @@ SIMPLE_JWT = {
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
-CSRF_COOKIE_DOMAIN = 'backend.tarixmanba.uz'
+CSRF_COOKIE_DOMAIN = 'subdomain.vodnikavtotest.uz'
 CSRF_TRUSTED_ORIGINS = ['https://subdomain.vodnikavtotest.uz',]
